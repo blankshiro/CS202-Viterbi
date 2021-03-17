@@ -1,46 +1,87 @@
-import sys
-# state = ["H", "L"]
-# observations = ["A", "C", "G", "T"]
-# start_prob = [0.5, ]
+#!/usr/bin/env python3
 
-# note we should log probabilities so it is much easier
-# for indexing purpose
-state = {0: "H", 1: "L"} 
-start_prob = {"H" : -1, "L": -1}
-
-transition_prob = {"H": {"H": -1, "L": -1}, "L": {"H": -1.322, "L": -0.737}}
-sequence_prob = {"H": {"A": -2.322, "C": -1.737, "G": -1.737, "T": -2.322},
-"L": {"A": -1.737, "C": -2.322, "G": -2.322, "T": -1.737}}
-
-# [0]*number of cols for i in range(row)
-# Instead of using hashmap, i use 2d list instead, easier to understand
-table = [[0]*9 for i in range(2)]
-
-string = "GGCACTGAA"
-
-#initialize the first column with start prob + sequence prob:
-for i in range(0, len(table)):
-    state_c = state.get(i)
-    table[i][0] = round(start_prob.get(state_c) + sequence_prob[state_c][string[0]], 2)
+# Viterbi Algorithm by CS202 G1T1:
+# Cheyenne Jan Lee
+# Edwin Tok Wei Liang
+# Lee It Tat
+# Madeleine Hoo Jia Lei
+# Pang Huan Shan, Shawn
+# Tan Jun An
 
 
-#note : table[0][1] = -1.737 + max(table[0][0] + transition_prob[state[0]][state[0]], table[1][0] + transition_prob[state[1]][state[0]])
-#this above statement is equivalent to -1.737 + max(table[H][col 0] + transition_prob[H][H], table[L][0] + transition_prob[L][H])
-
-for i in range(1, len(table[0])):
-    letter = string[i]
-
-    for j in range(0, len(table)):
-        ans = -sys.maxsize - 1
-        letter_prob = sequence_prob[state[j]][letter]
-        for k in range(0, len(table)):
-            p_state = transition_prob[state[k]][state[j]]
-            ans = max(ans, table[k][i-1] + p_state)
-
-        table[j][i] = round(ans + letter_prob, 2)
+def print_table(title, table):
+    """Helper function to pretty print table of probabilities"""
+    print(title + ':')
+    row_format = '{:>7.2f}' * (len(table[0]))
+    for row in table:
+        print(row_format.format(*row))
+    print()
 
 
-print(table)
+def get_sequence(table, states):
+    """Retrieves the most likely sequence/path of hidden states from the final table of probabilities from Viterbi algorithm"""
+
+    cols = zip(*table) # 'transpose' the table, so we can access by columns
+    return [states[col.index(max(col))] for col in cols] # retrieve corresponding state for the max val of each column
 
 
+def viterbi(states, start_prob, transition_prob, emission_prob, observations):
+    """Finds the most likely sequence/path of hidden states that has generated the given observation.
+    This is a log-variant of Viterbi, which means it works with log probabilities only. Additions are used instead of
+    mulitiplications when dealing with the probabilities, which improves accuracy and improves complexity.
+    """
 
+    # Allocate a 2D table to store our final probabilities; size is states x length of observations
+    table = [[0] * len(observations) for i in range(len(states))]
+
+    # Initialize the first column with start prob + emission prob for the first observation:
+    for row_index, state in enumerate(states):
+        table[row_index][0] = start_prob[state] + emission_prob[state][observations[0]]
+    print_table('Initialized table with first column filled', table)
+
+    # For each observation i, starting from index 1
+    for i in range(1, len(observations)):
+        observation = observations[i]
+        # For each state j
+        for j in range(len(states)):
+            ans = -float('inf')
+            # For each state k (before j, leading to j)
+            for k in range(len(states)):
+                observation_p = emission_prob[states[j]][observation] # Probability of observation being emitted given state j: P(observation|state j)
+                transition_p = transition_prob[states[k]][states[j]] # Probability of transition to state j given state k: P(transition to state j|state k)
+                observation_state_p = observation_p + transition_p # Probability of observation and state: P(observation, state j) = P(observation|state j) + P(transition to state j|state k)
+                ans = max(ans, table[k][i-1] + observation_state_p)
+            table[j][i] = ans
+    print_table('Table with final probability values', table)
+
+    return get_sequence(table, states)
+
+
+def main():
+    # Note: we use log probabilities for an improved accuracy and improved complexity as we perform additions instead of multiplications
+
+    # Hidden Markov Model
+    states = ('H', 'L')
+    start_prob = {
+        'H': -1, # 50%
+        'L': -1  # 50%
+    }
+    transition_prob = {
+        'H': {'H': -1,     'L': -1},
+        'L': {'H': -1.322, 'L': -0.737}
+    }
+    emission_prob = {
+        'H': {'A': -2.322, 'C': -1.737, 'G': -1.737, 'T': -2.322},
+        'L': {'A': -1.737, 'C': -2.322, 'G': -2.322, 'T': -1.737}
+    } # observations include: 'A', 'C', 'G' and 'T'
+
+    # The sequence of observations
+    observations = 'GGCACTGAA'
+
+    # Perform Viterbi algorithm
+    most_likely_path = viterbi(states, start_prob, transition_prob, emission_prob, observations)
+    print(most_likely_path)
+
+
+if __name__ == '__main__':
+    main()
