@@ -9,11 +9,17 @@
 # Tan Jun An
 
 
-def print_table(title, table):
+def print_table(title, table, states, observations):
     """Helper function to pretty print table of probabilities"""
     print(title + ':')
-    row_format = '{:>7.2f}' * (len(table[0]))
-    for row in table:
+    pretty_table = []
+    pretty_table.append([''] + list(observations))
+    for i, row in enumerate(table):
+        pretty_table.append([states[i]] + row)
+    row_format = '{:>1}' + '{:>8}' * (len(pretty_table[0]) - 1)
+    print(row_format.format(*pretty_table[0]))
+    row_format = '{:>1}' + '{:>8.2f}' * (len(pretty_table[0]) - 1)
+    for row in pretty_table[1:]:
         print(row_format.format(*row))
     print()
 
@@ -37,7 +43,7 @@ def viterbi(states, start_prob, transition_prob, emission_prob, observations):
     # Initialize the first column with start prob + emission prob for the first observation:
     for row_index, state in enumerate(states):
         table[row_index][0] = start_prob[state] + emission_prob[state][observations[0]]
-    print_table('Initialized table with first column filled', table)
+    print_table('Initialized table with first column filled', table, states, observations)
 
     # For each observation i, starting from index 1
     for i in range(1, len(observations)):
@@ -52,7 +58,7 @@ def viterbi(states, start_prob, transition_prob, emission_prob, observations):
                 observation_state_p = observation_p + transition_p # Probability of observation and state: P(observation, state j) = P(observation|state j) + P(transition to state j|state k)
                 ans = max(ans, table[k][i-1] + observation_state_p)
             table[j][i] = ans
-    print_table('Table with final probability values', table)
+    print_table('Table with final probability values', table, states, observations)
 
     return get_sequence(table, states)
 
