@@ -1,0 +1,50 @@
+S is the state space = {s1, s2....sk}.
+
+Initial is the array of starting probabilities = {i1, i2, i3,....ik}.
+
+T is the transition matrix K x K such that T[i][j] stores the transition probability of transiting from state si to state sj.
+
+E is the Emission matrix K x N such that E[i][j] stores the probability of observing oj from state si.
+
+O is the observation list = {o1, o2, o3, o4...on}
+
+
+
+Function Viterbi(S, Initial, T, E, O):
+    //initialize table
+    table[K][N]
+    
+    for each state in S, i = 1 to K do:
+        table[i][0] ← Initial[i] + E[i][O[0]]
+    Endfor
+    
+    for each observation in O, i = 2 to N do:
+        obs ← O[i]
+        
+        for each state in S, j = 1 to K do:
+            ans ← MIN_INTEGER
+            
+            for each state in S, k = 1 to K do:
+                obs_p ← E[j][i]
+                trans_p ← T[k][j]
+                obs_state_p ← obs_p + trans_p
+                ans ← argmax(ans, table[k][i-1] + obs_state_p)
+            Endfor
+            
+            table[j][i] = ans
+        Endfor
+    Endfor
+    
+    sequence[N]
+    for each column in table, t = 1 to N do:
+        max_val ← table[1][t]
+        index ← 1
+        for each row in table, r = 2 to k do:
+            max_val, index ← argmax(max_val, table[r][t])
+        Endfor
+        
+        sequence[t] ← index
+    Endfor
+    
+    Return sequence
+Endfunction
