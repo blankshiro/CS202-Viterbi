@@ -28,7 +28,7 @@ Function Viterbi(S, Initial, T, E, O):
                 obs_p ← E[j][i]
                 trans_p ← T[k][j]
                 obs_state_p ← obs_p + trans_p
-                ans ← argmax(ans, table[k][i-1] + obs_state_p)
+                ans ← max(ans, table[k][i-1] + obs_state_p)
             Endfor
             
             table[j][i] = ans
