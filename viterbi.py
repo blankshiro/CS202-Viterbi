@@ -24,13 +24,6 @@ def print_table(title, table, states, observations):
     print()
 
 
-def get_sequence(table, states):
-    """Retrieves the most likely sequence/path of hidden states from the final table of probabilities from Viterbi algorithm"""
-
-    cols = zip(*table) # 'transpose' the table, so we can access by columns
-    return [states[col.index(max(col))] for col in cols] # retrieve corresponding state for the max val of each column
-
-
 def viterbi(states, start_prob, transition_prob, emission_prob, observations):
     """Finds the most likely sequence/path of hidden states that has generated the given observation.
     This is a log-variant of Viterbi, which means it works with log probabilities only. Additions are used instead of
@@ -40,12 +33,12 @@ def viterbi(states, start_prob, transition_prob, emission_prob, observations):
     # Allocate a 2D table to store our final probabilities; size is states x length of observations
     table = [[0] * len(observations) for i in range(len(states))]
 
-    # Initialize the first column with start prob + emission prob for the first observation:
+    # Fill first column with start prob + emission prob for the first observation:
     for row_index, state in enumerate(states):
         table[row_index][0] = start_prob[state] + emission_prob[state][observations[0]]
     print_table('Initialized table with first column filled', table, states, observations)
 
-    # For each observation i, starting from index 1
+    # Perform dynamic programming: for each observation i, starting from index 1
     for i in range(1, len(observations)):
         observation = observations[i]
         # For each state j
@@ -60,7 +53,10 @@ def viterbi(states, start_prob, transition_prob, emission_prob, observations):
             table[j][i] = ans
     print_table('Table with final probability values', table, states, observations)
 
-    return get_sequence(table, states)
+    # Retrieve most likely sequence of hidden states
+    cols = zip(*table) # 'transpose' the table, so we can access by columns
+    sequence = [states[col.index(max(col))] for col in cols] # retrieve corresponding state for the max val of each column
+    return sequence
 
 
 def main():
@@ -86,6 +82,7 @@ def main():
 
     # Perform Viterbi algorithm
     most_likely_path = viterbi(states, start_prob, transition_prob, emission_prob, observations)
+    print('Most likely sequence of hidden states:')
     print(most_likely_path)
 
 

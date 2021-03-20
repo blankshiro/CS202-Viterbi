@@ -1,28 +1,32 @@
-S is the state space = {s1, s2....sk}.
+S is the state space = {s1, s2, ..., sK}, where K is the number of possible states.
 
-Initial is the array of starting probabilities = {i1, i2, i3,....ik}.
+X is the observation space = {x1, x2, ..., xZ}, where Z is the number of possible observations (note: not used in both code and pseudocode)
+
+Initial is the array of starting probabilities = {i1, i2, ..., ik}.
 
 T is the transition matrix K x K such that T[i][j] stores the transition probability of transiting from state si to state sj.
 
-E is the Emission matrix K x N such that E[i][j] stores the probability of observing oj from state si.
+E is the Emission matrix K x Z such that E[i][j] stores the probability of observing oj from state si.
 
-O is the observation list = {o1, o2, o3, o4...on}
+O is the observation list = {o1, o2, ..., oN}, where N is the number of observations in the observation sequence.
 
 
 
 Function Viterbi(S, Initial, T, E, O):
-    //initialize table
+    // Initialize table
     table[K][N]
     
+    // Fill first column with starting values
     for each state in S, i = 1 to K do:
         table[i][0] ← Initial[i] + E[i][O[0]]
     Endfor
     
+    // Perform dynamic programming
     for each observation in O, i = 2 to N do:
         obs ← O[i]
         
         for each state in S, j = 1 to K do:
-            ans ← MIN_INTEGER
+            ans ← MIN_DOUBLE
             
             for each state in S, k = 1 to K do:
                 obs_p ← E[j][i]
@@ -39,7 +43,7 @@ Function Viterbi(S, Initial, T, E, O):
     for each column in table, t = 1 to N do:
         max_val ← table[1][t]
         index ← 1
-        for each row in table, r = 2 to k do:
+        for each row in table, r = 2 to K do:
             max_val, index ← argmax(max_val, table[r][t])
         Endfor
         
