@@ -46,9 +46,12 @@ def viterbi(states, start_prob, transition_prob, emission_prob, observations):
             ans = -float('inf')
             # For each state k (before j, leading to j)
             for k in range(len(states)):
-                observation_p = emission_prob[states[j]][observation] # Probability of observation being emitted given state j: P(observation|state j)
-                transition_p = transition_prob[states[k]][states[j]] # Probability of transition to state j given state k: P(transition to state j|state k)
-                observation_state_p = observation_p + transition_p # Probability of observation and state: P(observation, state j) = P(observation|state j) + P(transition to state j|state k)
+                # Probability of observation being emitted given state j: P(observation|state j)
+                observation_p = emission_prob[states[j]][observation]
+                # Probability of transition to state j given state k: P(transition to state j|state k)
+                transition_p = transition_prob[states[k]][states[j]]
+                # Probability of observation and state: P(observation, state j)
+                observation_state_p = observation_p + transition_p
                 ans = max(ans, table[k][i-1] + observation_state_p)
             table[j][i] = ans
     print_table('Table with final probability values', table, states, observations)
@@ -60,7 +63,7 @@ def viterbi(states, start_prob, transition_prob, emission_prob, observations):
 
 
 def main():
-    # Note: we use log probabilities for an improved accuracy and improved complexity as we perform additions instead of multiplications
+    # Note: we use log probabilities for an improved accuracy as we perform additions instead of multiplications
 
     # Hidden Markov Model
     states = ('H', 'L')
