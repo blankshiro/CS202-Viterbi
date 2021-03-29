@@ -1,0 +1,6 @@
+[submodule "viterbi"]
+	path = viterbi
+	url = https://github.com/xukmin/viterbi
+[submodule "demo/viterbi"]
+	path = demo/viterbi
+	url = https://github.com/xukmin/viterbi
